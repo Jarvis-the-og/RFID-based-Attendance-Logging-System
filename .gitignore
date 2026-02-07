@@ -1,0 +1,22 @@
+# Environment variables
+.env
+
+# Node
+node_modules/
+
+# Logs
+logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+rfid-backend/ca.pem
