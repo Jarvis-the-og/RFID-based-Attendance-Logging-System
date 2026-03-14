@@ -1,5 +1,4 @@
 # RFID-Based Attendance Logging System
-# RFID-Based Attendance Logging System
 
 ![RFID Attendance System](https://img.shields.io/badge/System-RFID%20Attendance-blue)
 ![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
