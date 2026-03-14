@@ -1,5 +1,87 @@
 # RFID-Based Attendance Logging System
+# RFID-Based Attendance Logging System
 
+![RFID Attendance System](https://img.shields.io/badge/System-RFID%20Attendance-blue)
+![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
+![React](https://img.shields.io/badge/Frontend-React-blue)
+![ESP32](https://img.shields.io/badge/Hardware-ESP32-orange)
+![MySQL](https://img.shields.io/badge/Database-MySQL-lightblue)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+A **real-time RFID-based attendance management system** built using **ESP32, Node.js, MySQL, and React**.  
+The system allows organizations to **register employees, track attendance using RFID cards, and monitor activity in real time through a web dashboard**.
+
+---
+
+## Project Overview
+
+This project demonstrates how **IoT devices can integrate with a full-stack web application** to create an automated attendance logging system.
+
+Key capabilities include:
+
+- RFID-based employee authentication
+- Real-time attendance tracking
+- Role-based employee hierarchy
+- Admin dashboard for system management
+- ESP32 device integration
+- Cloud database storage
+- Automated attendance status toggling (IN / OUT)
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TD
+
+ESP32[ESP32 Device] -->|RFID Scan| API[Node.js Backend API]
+API --> DB[(MySQL Database - Aiven Cloud)]
+API --> Dashboard[React Admin Dashboard]
+
+Dashboard -->|Register RFID| API
+Dashboard -->|View Attendance| API
+Dashboard -->|Start Enrollment| API
+```
+
+---
+
+## Live System Workflow
+
+```mermaid
+sequenceDiagram
+
+participant ESP32
+participant Backend
+participant Database
+participant Dashboard
+
+ESP32->>Backend: POST /api/scan (RFID UID)
+Backend->>Database: Find User
+Database-->>Backend: User Found
+Backend->>Database: Insert Attendance Log
+Backend-->>ESP32: Response
+
+Dashboard->>Backend: GET /api/attendance
+Backend->>Database: Fetch Logs
+Database-->>Backend: Data
+Backend-->>Dashboard: JSON Response
+Dashboard->>Dashboard: Update UI
+```
+
+---
+
+## Role Hierarchy
+
+```mermaid
+graph TD
+
+Admin --> Manager
+Manager --> AssistantEmployee1
+Manager --> AssistantEmployee2
+Manager --> AssistantEmployee3
+```
+
+---
 A **real-time attendance management system** using RFID technology, ESP32 devices, and a full-stack web dashboard.  
 The system enables organizations to **track employee attendance, manage roles, and monitor check-in/check-out activity in real time**.
 
