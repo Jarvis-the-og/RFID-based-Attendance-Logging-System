@@ -1,193 +1,361 @@
-# RFID‑Based Attendance Logging System
+# RFID-Based Attendance Logging System
 
-## 📌 Problem Statement
-
-Traditional attendance systems (manual registers, sign sheets, proxy methods) are:
-
-* Time‑consuming
-* Prone to human error
-* Easy to manipulate (proxy attendance)
-* Hard to analyze and audit later
-
-Institutions need a **secure, automated, and trackable** attendance system that integrates hardware with a modern software dashboard.
+A **real-time attendance management system** using RFID technology, ESP32 devices, and a full-stack web dashboard.  
+The system enables organizations to **track employee attendance, manage roles, and monitor check-in/check-out activity in real time**.
 
 ---
 
-## 💡 Solution Overview
+## System Architecture
 
-This project implements an **RFID‑based attendance logging system** with:
+```mermaid
+flowchart TD
 
-* RFID card scanning (hardware)
-* A Node.js backend for validation & storage
-* A React dashboard for visualization and management
+A[ESP32 Device] -->|RFID Scan Request| B[Node.js Backend API]
+B -->|Store / Retrieve Data| C[(MySQL Database - Aiven Cloud)]
+B -->|REST API| D[React Admin Dashboard]
 
-Each RFID scan is validated, logged into a database, and reflected in real‑time on the dashboard.
+D -->|Start Enrollment| B
+D -->|View Attendance Logs| B
+D -->|Register RFID Users| B
 
----
-
-## 🧠 System Architecture
-
-```
-RFID Tag
-   ↓
-RFID Reader (ESP32)
-   ↓  HTTP Request
-Backend Server (Node.js + Express)
-   ↓
-Database (MySQL) hosted on Aiven (for now)
-   ↓
-React Dashboard (Attendance View & Export)
+A -->|HTTP Request /api/scan| B
 ```
 
 ---
 
-## 🧩 Project Structure
+## Attendance Workflow
 
-```
-RFID Attendance Logger/
-│
-├── rfid-backend/                # Backend server
-│   ├── index.js                 # Server entry point
-│   ├── db.js                    # Database connection logic
-│   ├── package.json
-│   ├── .env.example             # Environment variables template
-│   └── ca.pem.example           # SSL certificate template
-│
-├── rfid-attendance-dashboard/   # Frontend dashboard (React)
-│   ├── src/
-│   │   ├── components/
-│   │   ├── services/
-│   │   └── utils/
-│   ├── public/
-│   └── package.json
-│
-└── .gitignore
+```mermaid
+sequenceDiagram
+
+participant ESP32
+participant Backend
+participant Database
+participant Dashboard
+
+ESP32->>Backend: POST /api/scan (RFID UID)
+Backend->>Database: Find User by RFID
+Database-->>Backend: User Found
+Backend->>Database: Insert Attendance Log (IN/OUT)
+Backend-->>ESP32: Response (Success + Status)
+
+Dashboard->>Backend: GET /api/attendance
+Backend->>Database: Fetch Latest Logs
+Database-->>Backend: Attendance Data
+Backend-->>Dashboard: JSON Response
+Dashboard->>Dashboard: Update UI
 ```
 
 ---
 
-## ⚙️ Tech Stack
+## Role Hierarchy
+
+```mermaid
+graph TD
+
+Admin --> Manager
+Manager --> AssistantEmployee1
+Manager --> AssistantEmployee2
+Manager --> AssistantEmployee3
+```
+
+---
+
+## Features
+
+### RFID Attendance Logging
+- Employees tap RFID cards to **check IN / OUT**
+- System automatically **toggles attendance status**
+- Attendance records are stored in the database
+
+---
+
+### Role-Based Access
+
+The system supports three types of users:
+
+| Role | Permissions |
+|-----|-------------|
+Admin | Full system control |
+Manager | View attendance of assigned employees |
+Assistant Employee | Mark attendance via RFID |
+
+---
+
+### Admin Dashboard
+
+The Admin Dashboard provides:
+
+- RFID card registration
+- Employee role assignment
+- Department assignment
+- Manager assignment
+- Real-time attendance monitoring
+- Attendance statistics
+- Activity logs
+- CSV report export
+- RFID enrollment mode
+
+---
+
+### RFID Enrollment Mode
+
+Admin can enable **Enrollment Mode** to register new cards.
+
+**Process:**
+
+1. Admin clicks **Start Enrollment**
+2. User taps an RFID card
+3. UID is captured automatically
+4. Admin enters employee details
+5. User is registered in the system
+
+---
+
+## Tech Stack
 
 ### Hardware
-
-* ESP32
-* RC522 RFID Reader
-* RFID Tags/Cards
-* I2C-connected LCD Displays
-* Buzzers
-
+- ESP32
+- RFID Reader (RC522 or simulated ESP32 requests)
 
 ### Backend
-
-* Node.js
-* Express.js
-* MySQL
+- Node.js
+- Express.js
+- MySQL
+- Aiven Cloud Database
 
 ### Frontend
+- React.js
+- Tailwind CSS
+- Lucide Icons
 
-* React.js
-* Tailwind CSS
-* Axios
+### Communication
+- REST API
+- HTTP requests from ESP32
 
 ---
 
-## 🚀 Setup Instructions
+## Project Structure
 
-### 1️⃣ Clone the Repository
-
-```bash
-git clone https://github.com/jarvis-the-og/RFID-based-Attendance-Logging-System.git
-cd RFID-Attendance-Logger
+```
+RFID-based-Attendance-Logging-System
+│
+├── backend
+│   ├── index.js
+│   └── db.js
+│
+├── frontend
+│   └── RFIDDashboard.jsx
+│
+├── esp32
+│   └── esp32_simulation.ino
+│
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-### 2️⃣ Backend Setup
+## Database Schema
 
-```bash
-cd rfid-backend
+### Users Table
+
+| Field | Description |
+|-----|-------------|
+user_id | Unique user identifier |
+name | Employee name |
+rfid_uid | RFID card UID |
+role | admin / manager / assistant_employee |
+department | Department name |
+manager_id | Assigned manager |
+
+---
+
+### Attendance Logs Table
+
+| Field | Description |
+|-----|-------------|
+log_id | Unique log entry |
+user_id | Employee reference |
+scan_type | IN / OUT |
+device_id | Device identifier |
+scan_time | Timestamp |
+
+---
+
+## API Endpoints
+
+### Get Attendance
+
+```
+GET /api/attendance
+```
+
+Returns current attendance status of all users.
+
+---
+
+### Add RFID User
+
+```
+POST /api/rfid
+```
+
+Example request:
+
+```json
+{
+  "rfid": "UID123",
+  "name": "John",
+  "role": "assistant_employee",
+  "department": "Engineering",
+  "manager_id": 2
+}
+```
+
+---
+
+### RFID Scan
+
+```
+POST /api/scan
+```
+
+Example request:
+
+```json
+{
+  "rfid_uid": "UID123",
+  "device_id": "ENTRANCE_GATE"
+}
+```
+
+---
+
+### Start Enrollment Mode
+
+```
+POST /api/enroll/start
+```
+
+---
+
+### Stop Enrollment Mode
+
+```
+POST /api/enroll/stop
+```
+
+---
+
+### Get Last Enrollment UID
+
+```
+GET /api/enroll/latest
+```
+
+---
+
+## ESP32 Simulation
+
+For testing without RFID hardware, the ESP32 can simulate card scans by sending requests to:
+
+```
+POST /api/scan
+```
+
+Example payload:
+
+```json
+{
+  "rfid_uid": "TEST_RFID_001",
+  "device_id": "ESP32_TEST"
+}
+```
+
+---
+
+## Installation
+
+### Clone Repository
+
+```
+git clone https://github.com/Jarvis-the-og/RFID-based-Attendance-Logging-System.git
+```
+
+---
+
+### Backend Setup
+
+```
+cd backend
 npm install
-```
-
-Create `.env` from the example:
-
-```bash
-cp .env.example .env
-```
-
-Fill in your database credentials in `.env`.
-
-Run backend:
-
-```bash
 node index.js
 ```
 
 ---
 
-### 3️⃣ Frontend Setup
+### Frontend Setup
 
-```bash
-cd rfid-attendance-dashboard
+```
+cd frontend
 npm install
 npm start
 ```
 
-Dashboard runs on:
+---
+
+## Environment Variables
+
+Create a `.env` file inside the backend folder.
 
 ```
-http://localhost:3000
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
 ```
 
 ---
 
-## 📊 Features
+## Demo Workflow
 
-* RFID‑based attendance capture
-* Secure backend validation
-* Centralized database logging
-* Real‑time attendance dashboard
-* CSV export of attendance records
-* Clean separation of frontend & backend
-
----
-
-## 🔐 Security Practices
-
-* `.env` files are git‑ignored
-* Example env files provided (`.env.example`)
-* No credentials committed to repository
-* SSL certificate example isolated
+1. Start backend server
+2. Start frontend dashboard
+3. Register employee RFID
+4. Tap RFID card using ESP32
+5. Attendance is logged automatically
+6. Dashboard updates in real time
 
 ---
 
-## 🎓 Academic / Demo Use
+## Security
 
-This project is suitable for:
+Sensitive files are excluded using `.gitignore`.
 
-* College mini / major projects
-* IoT + Web integration demos
-* Smart campus / smart classroom concepts
+Ignored files include:
 
----
-
-## 🔮 Future Enhancements (work in progress)
-
-* Role‑based access (Admin / Faculty)
-* Real‑time WebSocket updates
-* Facial recognition
-* Cloud deployment
-* Analytics & attendance trends
+- `.env`
+- `ca.pem`
+- `node_modules`
+- build artifacts
 
 ---
 
-## 👤 Author
+## Future Improvements
 
-**Rishabh Dev Pandey**
-RFID • IoT • Backend • Frontend Integration
+- Manager dashboard
+- WebSocket-based real-time updates
+- Mobile application support
+- Multi-device attendance gates
+- Face recognition fallback
 
 ---
 
-## ⭐ If you like this project
+## Author
 
-Give it a star ⭐ on GitHub — it helps a lot!
+**Rishabh Dev**
+
+GitHub:  
+https://github.com/Jarvis-the-og
