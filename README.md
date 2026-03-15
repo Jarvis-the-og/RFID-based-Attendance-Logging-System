@@ -356,27 +356,58 @@ Example payload:
 
 ---
 
-##Hardware Connections
+## Hardware Connections
 
-RC522 → ESP32
-RC522	ESP32
-SDA	GPIO 27
-RST	GPIO 14
-SCK	GPIO 18
-MISO	GPIO 19
-MOSI	GPIO 23
-3.3V	3.3V
-GND	GND
-LCD
-LCD	ESP32
-SDA	GPIO 21
-SCL	GPIO 22
-VCC	VIN
-GND	GND
-Buzzer
-Pin	ESP32
-+	GPIO 15
-–	GND
+### RC522 RFID Reader → ESP32
+
+| RC522 Pin | ESP32 Pin |
+|-----------|-----------|
+| SDA (SS)  | GPIO 27   |
+| SCK       | GPIO 18   |
+| MOSI      | GPIO 23   |
+| MISO      | GPIO 19   |
+| RST       | GPIO 14   |
+| 3.3V      | 3.3V      |
+| GND       | GND       |
+
+⚠️ **Important:** The RC522 module operates on **3.3V only**. Supplying 5V may damage the module.
+
+---
+
+### I2C LCD Display → ESP32
+
+| LCD Pin | ESP32 Pin |
+|--------|-----------|
+| SDA    | GPIO 21   |
+| SCL    | GPIO 22   |
+| VCC    | VIN / 5V  |
+| GND    | GND       |
+
+The LCD communicates with the ESP32 using the **I2C protocol**, requiring only two data lines.
+
+---
+
+### Buzzer → ESP32
+
+| Buzzer Pin | ESP32 Pin |
+|-----------|-----------|
+| + (Signal) | GPIO 15 |
+| – (GND) | GND |
+
+The buzzer provides **audio feedback** for system events such as:
+
+- Successful RFID scan
+- Attendance marked (IN / OUT)
+- Invalid or unregistered card detection
+
+---
+
+### Hardware Components Used
+
+- **ESP32** – Microcontroller handling WiFi communication and API requests  
+- **RC522 RFID Reader** – Reads RFID card UID  
+- **I2C LCD Display** – Displays system messages (e.g., *Scan Card*, *Access Granted*)  
+- **Buzzer** – Provides audible feedback during scans
 
 ## Installation
 
