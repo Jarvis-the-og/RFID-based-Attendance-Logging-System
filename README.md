@@ -356,6 +356,28 @@ Example payload:
 
 ---
 
+##Hardware Connections
+
+RC522 → ESP32
+RC522	ESP32
+SDA	GPIO 27
+RST	GPIO 14
+SCK	GPIO 18
+MISO	GPIO 19
+MOSI	GPIO 23
+3.3V	3.3V
+GND	GND
+LCD
+LCD	ESP32
+SDA	GPIO 21
+SCL	GPIO 22
+VCC	VIN
+GND	GND
+Buzzer
+Pin	ESP32
++	GPIO 15
+–	GND
+
 ## Installation
 
 ### Clone Repository
