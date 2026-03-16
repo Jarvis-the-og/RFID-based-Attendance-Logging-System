@@ -364,7 +364,65 @@ app.get("/api/enroll/latest", (req, res) => {
   });
 
 });
+// ---------- MANAGER: GET TEAM STATUS ----------
+app.get("/api/manager/:manager_id/team", async (req, res) => {
+  const { manager_id } = req.params;
+  let conn;
+  try {
+    conn = await getConnection();
+    const [rows] = await conn.query(`
+      SELECT
+        u.user_id,
+        u.rfid_uid   AS rfid,
+        u.name,
+        u.department,
+        al.scan_type AS status,
+        al.scan_time AS lastScan
+      FROM users u
+      LEFT JOIN attendance_logs al
+        ON al.log_id = (
+          SELECT log_id FROM attendance_logs
+          WHERE user_id = u.user_id
+          ORDER BY scan_time DESC
+          LIMIT 1
+        )
+      WHERE u.manager_id = ?
+      ORDER BY u.name ASC
+    `, [manager_id]);
+    res.json(rows);
+  } catch (err) {
+    console.error("Manager team fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch team" });
+  } finally {
+    if (conn) await conn.end();
+  }
+});
 
+// ---------- MANAGER: GET ATTENDANCE LOGS ----------
+app.get("/api/manager/:manager_id/logs", async (req, res) => {
+  const { manager_id } = req.params;
+  let conn;
+  try {
+    conn = await getConnection();
+    const [rows] = await conn.query(`
+      SELECT
+        u.name,
+        al.scan_type,
+        al.device_id,
+        al.scan_time
+      FROM attendance_logs al
+      JOIN users u ON al.user_id = u.user_id
+      WHERE u.manager_id = ?
+      ORDER BY al.scan_time DESC
+    `, [manager_id]);
+    res.json(rows);
+  } catch (err) {
+    console.error("Manager logs fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch logs" });
+  } finally {
+    if (conn) await conn.end();
+  }
+});
 // ---------- START SERVER ----------
 (async () => {
 
