@@ -196,6 +196,15 @@ manager_id | Assigned manager |
 
 ---
 
+### Device Table
+
+| Field | Description |
+|-----|-------------|
+device_id | Unique device id |
+location | Location of the device |
+
+---
+
 ### Attendance Logs Table
 
 | Field | Description |
