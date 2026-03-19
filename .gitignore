@@ -1,6 +1,7 @@
 # Environment variables
 rfid-backend/.env
-
+db-simulator/.env
+db-simulator/ca.pem
 # Node
 node_modules/
 
